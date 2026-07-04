@@ -263,9 +263,17 @@ class TerminalViewState extends State<TerminalView> {
         onComposing: _onComposing,
         onAction: (action) {
           _scrollToBottom();
-          // Android sends TextInputAction.newline when the user presses the virtual keyboard's enter key.
-          if (action == TextInputAction.done || action == TextInputAction.newline) {
+
+          final isEnter =
+            action == TextInputAction.done ||
+            action == TextInputAction.newline ||
+            action == TextInputAction.go ||
+            action == TextInputAction.send ||
+            action == TextInputAction.search;
+          // 修复键盘Enter.
+          if (isEnter) {
             widget.terminal.keyInput(TerminalKey.enter);
+            return;
           }
         },
         onKeyEvent: _handleKeyEvent,
@@ -405,6 +413,20 @@ class TerminalViewState extends State<TerminalView> {
     if (event is KeyUpEvent) {
       return KeyEventResult.ignored;
     }
+    
+
+
+
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.enter){
+          widget.terminal.keyInput(TerminalKey.enter);
+          _scrollToBottom();
+          return KeyEventResult.handled;
+        }
+
+
+
+
 
     final key = keyToTerminalKey(event.logicalKey);
 
